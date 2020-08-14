@@ -2,7 +2,12 @@ import pandas as pd
 
 sales= pd.read_csv("train.csv")
 
+def month(s):
+    m = s[5:7]
+    return int(m)
+
 def sales_weekday(df):
+    df['month'] = df['Date'].apply(month)
     df.drop(columns=['Date','Unnamed: 0'], axis=1, inplace=True)
     dummy= pd.get_dummies(df)
     return dummy
@@ -81,7 +86,7 @@ def Random_forest_reg_train(X_train, y_train):
     from sklearn.ensemble import RandomForestRegressor
 
     # initialize model
-    model = RandomForestRegressor(n_estimators=100, max_depth=6, n_jobs=-1)
+    model = RandomForestRegressor(n_estimators=150, max_depth=16, n_jobs=-1)
 
     # fit model
     model.fit(X_train, y_train)
@@ -100,3 +105,17 @@ print('Train accuracy: ', r2_score(y_to_pred_train, y_train_pred))
 
 y_test_pred = model.predict(X_to_pred_test) * X_to_pred_test['Open']
 print('Test accuracy: ', r2_score(y_to_pred_test, y_test_pred))
+
+#######################################
+
+sales= pd.read_csv("train.csv")
+
+sales_dummies = sales_weekday(sales)
+sales_dummies = store_category(sales_dummies)
+sales_dummies.drop('Sales', axis=1, inplace=True)
+
+X = sales_dummies
+
+y_train_pred = model.predict(X) * X['Open']
+
+y_train_pred.to_csv('predictions.csv')
