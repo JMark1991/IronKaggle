@@ -13,7 +13,7 @@ def sales_weekday(df):
     return dummy
 
 def store_category(df):
-    dfcut=pd.cut(df['Sales'], 6, labels=['Incredibly Low',"Very Low","Low", "Medium","High",'Very High'])
+    dfcut=pd.cut(df['Nb_customers_on_day'], 6, labels=['Incredibly Low',"Very Low","Low", "Medium","High",'Very High'])
     df['Sales Quantity']= dfcut
     df.drop(columns=["Store_ID"], axis=1, inplace=True)
     dummies= pd.get_dummies(df)
@@ -108,14 +108,23 @@ print('Test accuracy: ', r2_score(y_to_pred_test, y_test_pred))
 
 #######################################
 
-sales= pd.read_csv("train.csv")
+sales = pd.read_csv('validation_features.csv')
+
+def month(s):
+    m = s[3:5]
+    return int(m)
+
+def sales_weekday(df):
+    df['month'] = df['Date'].apply(month)
+    df.drop(columns=['Date'], axis=1, inplace=True)
+    dummy= pd.get_dummies(df)
+    return dummy
 
 sales_dummies = sales_weekday(sales)
 sales_dummies = store_category(sales_dummies)
-sales_dummies.drop('Sales', axis=1, inplace=True)
 
 X = sales_dummies
 
-y_train_pred = model.predict(X) * X['Open']
+y__pred = model.predict(X) * X['Open']
 
-y_train_pred.to_csv('predictions.csv')
+y__pred.to_csv('predictions.csv')
